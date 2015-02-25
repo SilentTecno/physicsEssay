@@ -13,94 +13,93 @@ var Graphics = (function () {
 
 	}();
 
-		function Graphics() {
-			graphicsEngine = this;
+	var beginning
+		,context
+		,dt
+		,fps
+		,frames
+		,interval
+		,now
+		,then;
 
-			this.canvas = null;
-			this.bodyElement = null;
+	function Graphics() {
+		graphicsEngine = this;
 
-			this.init = function (p) {
+		this.init = function (p) {
 
-				this.bodyElement = this.dq('body')[0];
-				this.canvas = this.initCanvas(p);
+			fps = p.fps;
+			interval = 1000/fps;
+			then = beginning = Date.now();
+			frames = 0;
+			context = _canvas.getContext('2d');
 
-				this.fps = p.fps;
-				this.interval = 1000/this.fps;
-				this.now;
-				this.delta;
-				this.then = Date.now();
-				this.beginning = this.then;
-				this._frames = 0;
-				this.context = window._canvas.getContext('2d');
+		}
 
-			}
+		this.animate = function() {
+			graphicsClock(graphicsEngine.animate);
 
+			now = Date.now();
 
-			this.animate = function() {
-				graphicsClock(graphicsEngine.animate);
+			var delta = now - then;
 
-				graphicsEngine.now = Date.now();
+			if (delta > interval) {
 
-				var delta = graphicsEngine.now - graphicsEngine.then;
+				then = now - (delta % interval);
 
-				if (delta > graphicsEngine.interval) {
+				/*
+				A partir de aquí inicia nuestro experimento de gravedad
+				*/
 
-					graphicsEngine.then = graphicsEngine.now - (delta % graphicsEngine.interval);
-
-					/*
-					A partir de aquí inicia nuestro experimento de gravedad
-					*/
-
-					var tiempo_trans = (graphicsEngine.then - graphicsEngine.beginning) / 1000;
-
-					if (window.debug_mode == true)
-						document.getElementById('graphics_fps').innerHTML = 'Graphics: ' + ++graphicsEngine._frames + "f / " + parseInt(tiempo_trans) + "s = " + parseInt(graphicsEngine._frames / tiempo_trans) + "fps";
-
-					graphicsEngine.draw();
-
+				if (window.debug_mode == true) {
+					var tiempo_trans = (then - beginning) / 1000;
+					document.getElementById('graphics_fps').innerHTML = 'Graphics: ' + (++frames) + "f / " + parseInt(tiempo_trans) + "s = " + parseInt(frames / tiempo_trans) + "fps";
 				}
 
+				graphicsEngine.draw();
 
-			}
-
-			this.draw = function() {
-
-				clear();
-
-				window.particle.draw(graphicsEngine.context);
-
-			}
-
-			this.dq = function (p) {
-				var search = null;
-				if (p && typeof p === 'string') {
-					if (p.length > 1) {
-						if (p[0] === '#') {
-							search = p.substring(1, p.length);
-							return document.getElementById(search);
-						}
-						else if (p[0] === '.') {
-							search = p.substring(1, p.length);
-							return document.getElementsByClassName(search);
-						}
-						else {
-							return document.getElementsByTagName(p);	
-						}
-					}
-					else if (p.length > 0) {
-						return document.getElementsByTagName(p);
-					}
-				}
-			}
-
-			this.initCanvas = function() {
 			}
 
 		}
 
-		function clear() {
-			graphicsEngine.context.clearRect(0, 0, _canvas.width, _canvas.height);
+		this.draw = function() {
+
+			clear();
+
+			for (var i in particles)
+				particles[i].draw(context);
+
 		}
+
+		this.dq = function (p) {
+			var search = null;
+			if (p && typeof p === 'string') {
+				if (p.length > 1) {
+					if (p[0] === '#') {
+						search = p.substring(1, p.length);
+						return document.getElementById(search);
+					}
+					else if (p[0] === '.') {
+						search = p.substring(1, p.length);
+						return document.getElementsByClassName(search);
+					}
+					else {
+						return document.getElementsByTagName(p);	
+					}
+				}
+				else if (p.length > 0) {
+					return document.getElementsByTagName(p);
+				}
+			}
+		}
+
+		this.initCanvas = function() {
+		}
+
+	}
+
+	function clear() {
+		context.clearRect(0, 0, _canvas.width, _canvas.height);
+	}
 
 	return Graphics;
 })();

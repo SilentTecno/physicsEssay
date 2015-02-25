@@ -1,11 +1,10 @@
 var Particle = ( function(){
-	var _particle = _particle;
+	var _particle = this;
 
 	function Particle() {
-		//_particle = this;
+		_particle = this;
 
 		this.init = function (p) {
-			_particle = this;
 			_particle.vector = p.vector;
 			_particle.mass = p.mass || 0.1;
 			_particle.cr = p.bounciness || -0.5 // Coefficient of restitution
@@ -19,10 +18,14 @@ var Particle = ( function(){
 
 		this.draw = function(ctx) {
 			ctx.beginPath();
-			ctx.arc(_particle.vector.x, _particle.vector.y, _particle.radius, 0, 2*Math.PI);
-			ctx.fillStyle = _particle.color || 'blue';
-			//ctx.stroke();
+			ctx.arc(this.vector.x, this.vector.y, this.radius, 0, 2 * Math.PI);
+			ctx.fillStyle = this.color || 'blue';
 			ctx.fill();
+			ctx.closePath();
+
+			if (window.debug_mode) {
+				console.debug('I´m', this);
+			}
 		};
 
 		this.animate = function() {

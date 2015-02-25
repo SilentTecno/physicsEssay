@@ -14,18 +14,15 @@ var Physics = ( function () {
 	}();
 
 	var beginning
+		,dt
 		,fps
 		,frames
 		,interval
 		,now
-		,then
-		,dt
-		,vy;
+		,then;
 
 	function Physics() {
 		physicsEngine = this;
-
-		this.universe = null;
 
 		this.init = function (p) {
 			fps = p.fps;
@@ -53,25 +50,30 @@ var Physics = ( function () {
 
 				var fy = 0;
 
-				fy += particle.mass * 9.81 /6; // cálculo de la fuerza de gravedad (por lo pronto es la única fuerza que existe)
+				for (var i in particles) {
 
-				// aquí se usa algo llamado velvet integration (o integración velvet)
+					var particle = particles[i];
 
-				var dy = particle.vy * dt + (0.5 * particle.ay * Math.pow(dt, 2));
+					fy += particle.mass * 9.81 /6; // cálculo de la fuerza de gravedad (por lo pronto es la única fuerza que existe)
 
-				particle.vector.y += (dy * 100); // se hace un ajuste para escalar los mts a cms
+					// aquí se usa algo llamado velvet integration (o integración velvet)
 
-				var old_ay = particle.ay;
+					var dy = particle.vy * dt + (0.5 * particle.ay * Math.pow(dt, 2));
 
-				particle.ay = fy / particle.mass;
+					particle.vector.y += (dy * 100); // se hace un ajuste para escalar los mts a cms
 
-				var avg_ay = 0.5 * ( old_ay + particle.ay);
+					var old_ay = particle.ay;
 
-				particle.vy += avg_ay * dt;
+					particle.ay = fy / particle.mass;
 
-				if ( particle.vector.y + particle.radius > _canvas.height && particle.vy > 0) {// rudimentario detector de colisión con el piso
-					particle.vy *= particle.cr;
-					particle.vector.y = _canvas.height - particle.radius;
+					var avg_ay = 0.5 * ( old_ay + particle.ay);
+
+					particle.vy += avg_ay * dt;
+
+					if ( particle.vector.y + particle.radius > _canvas.height && particle.vy > 0) {// rudimentario detector de colisión con el piso
+						particle.vy *= particle.cr;
+						particle.vector.y = _canvas.height - particle.radius;
+					}
 				}
 
 				if (window.debug_mode) {

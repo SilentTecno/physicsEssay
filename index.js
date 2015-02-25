@@ -1,7 +1,7 @@
 var physics_fps = 50;
 var graphics_fps = 30;
-var debug_mode = true;
-var particle = new Particle();
+var debug_mode = false;
+var particles = [];
 var _canvas = document.getElementById('generalCanvas');
 
 window.onload = function () {
@@ -12,7 +12,6 @@ window.onload = function () {
 	var graphicsEngine = new Graphics();
 
 	physicsEngine.init({
-		universe: null,
 		fps: physics_fps
 	});
 
@@ -20,7 +19,21 @@ window.onload = function () {
 		fps: graphics_fps
 	});
 
-	particle.init({ vector:{x: 100, y: 100}, height: 5, color: 'red', mass: 1.0});
+	for (var i = 0; i < 3;  i++) {
+		var particle = new Particle();
+
+		var _color;
+
+		switch(i){
+			case 0: _color = 'red'; break;
+			case 1: _color = 'blue'; break;
+			case 2: _color = 'green'; break;
+		}
+
+		particle.init({ vector:{x: 100 * i + (5), y: 100}, height: (5 * i) + 5, color: _color, mass: 1.0 * i});
+
+		particles.push(particle);
+	}
 
 	physicsEngine.animate();
 	graphicsEngine.animate();
