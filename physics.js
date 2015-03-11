@@ -48,32 +48,41 @@ var Physics = ( function () {
 				A partir de aquí inicia nuestro experimento de gravedad
 				*/
 
-				var fy = 0;
-
 				for (var i in particles) {
 
-					var particle = particles[i];
+					var p = particles[i];
 
-					fy += particle.mass * 9.81 /6; // cálculo de la fuerza de gravedad (por lo pronto es la única fuerza que existe)
+					p.forces.add({y: p.mass * 9.18 / 60});
 
 					// aquí se usa algo llamado velvet integration (o integración velvet)
 
-					var dy = particle.vy * dt + (0.5 * particle.ay * Math.pow(dt, 2));
+					var dy = p.velocity.y * dt + (0.5 * p.acceleration.y * Math.pow(dt, 2));
+					var dx = p.velocity.x * dt + (0.5 * p.acceleration.x * Math.pow(dt, 2));
 
-					particle.vector.y += (dy * 100); // se hace un ajuste para escalar los mts a cms
+					p.position.add({x: dx * 10, y: dy * 10});
 
-					var old_ay = particle.ay;
+					var old_ay = p.acceleration.y;
+					var old_ax = p.acceleration.x;
 
-					particle.ay = fy / particle.mass;
+					p.acceleration.set({x: p.forces.x / p.mass, y: p.forces.y / p.mass});
 
-					var avg_ay = 0.5 * ( old_ay + particle.ay);
+					var avg_ay = 0.5 * ( old_ay + p.acceleration.y);
+					var avg_ax = 0.5 * ( old_ax + p.acceleration.x);
 
-					particle.vy += avg_ay * dt;
+					p.velocity.add({x: avg_ax * dt, y: avg_ay * dt});
 
-					if ( particle.vector.y + particle.radius > _canvas.height && particle.vy > 0) {// rudimentario detector de colisión con el piso
-						particle.vy *= particle.cr;
-						particle.vector.y = _canvas.height - particle.radius;
+					if ( p.position.y + p.radius > _canvas.height && p.velocity.y > 0) {// rudimentario detector de colisión con el piso
+						p.velocity.y *= p.cr;
+						p.position.y = _canvas.height - p.radius;
+					} else if (p.velocity.y <= 0) {
+						console.debug('llegaste al piso');
 					}
+
+					if ( p.position.x + p.radius > _canvas.width && p.velocity.x > 0) {// rudimentario detector de colisión con el piso
+						p.velocity.x *= p.cr;
+						p.position.x = _canvas.width - p.radius;
+					}
+
 				}
 
 				if (window.debug_mode) {
