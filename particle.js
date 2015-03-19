@@ -12,6 +12,8 @@ var Particle = ( function(){
 			_particle.color = p.color;
 			_particle.position = new Vector(p.position);
 			_particle.velocity = new Vector({x:0, y: 0});
+			_particle.lastVelocity = new Vector({x:0, y: 0});
+			_particle.grounded = {x: false, y: false};
 			_particle.acceleration = new Vector({x:0, y: 0});
 			_particle.forces = new Vector({x:0, y: 0});
 		};

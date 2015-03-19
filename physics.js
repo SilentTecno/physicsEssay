@@ -52,35 +52,57 @@ var Physics = ( function () {
 
 					var p = particles[i];
 
-					p.forces.add({y: p.mass * 9.18 / 60});
+					if (!p.grounded.y) {
 
-					// aquí se usa algo llamado velvet integration (o integración velvet)
+						p.forces.add({y: p.mass * 9.18 / 60});
 
-					var dy = p.velocity.y * dt + (0.5 * p.acceleration.y * Math.pow(dt, 2));
-					var dx = p.velocity.x * dt + (0.5 * p.acceleration.x * Math.pow(dt, 2));
+						// aquí se usa algo llamado velvet integration (o integración velvet)
 
-					p.position.add({x: dx * 10, y: dy * 10});
+						var dy = p.velocity.y * dt + (0.5 * p.acceleration.y * Math.pow(dt, 2));
 
-					var old_ay = p.acceleration.y;
-					var old_ax = p.acceleration.x;
+						p.position.add({y: dy * 10});
 
-					p.acceleration.set({x: p.forces.x / p.mass, y: p.forces.y / p.mass});
+						var old_ay = p.acceleration.y;
 
-					var avg_ay = 0.5 * ( old_ay + p.acceleration.y);
-					var avg_ax = 0.5 * ( old_ax + p.acceleration.x);
+						p.acceleration.set({y: p.forces.y / p.mass});
 
-					p.velocity.add({x: avg_ax * dt, y: avg_ay * dt});
+						var avg_ay = 0.5 * ( old_ay + p.acceleration.y);
 
-					if ( p.position.y + p.radius > _canvas.height && p.velocity.y > 0) {// rudimentario detector de colisión con el piso
-						p.velocity.y *= p.cr;
-						p.position.y = _canvas.height - p.radius;
-					} else if (p.velocity.y <= 0) {
-						console.debug('llegaste al piso');
+						p.velocity.add({y: avg_ay * dt});
+
+						if ( p.position.y + p.radius > _canvas.height && p.velocity.y > 0) {// rudimentario detector de colisión con el piso
+							p.velocity.y *= p.cr;
+
+							var velocity_factor = (p.lastVelocity.y - p.velocity.y)/p.cr;
+							p.grounded.y = Math.floor(velocity_factor) == 0;
+							p.lastVelocity.y = p.velocity.y;
+							p.position.y = _canvas.height - p.radius;
+						}
+
+						if (p.position.y + p.radius == _canvas.height) {
+							console.debug('Debería detenerme?:', p.grounded.y);
+						}
 					}
 
-					if ( p.position.x + p.radius > _canvas.width && p.velocity.x > 0) {// rudimentario detector de colisión con el piso
-						p.velocity.x *= p.cr;
-						p.position.x = _canvas.width - p.radius;
+					if (!p.grounded.x) {
+
+						var dx = p.velocity.x * dt + (0.5 * p.acceleration.x * Math.pow(dt, 2));
+
+						p.position.add({x: dx * 10});
+
+						var old_ax = p.acceleration.x;
+
+						p.acceleration.set({x: p.forces.x / p.mass});
+
+						var avg_ax = 0.5 * ( old_ax + p.acceleration.x);
+
+						p.velocity.add({x: avg_ax * dt});
+
+						if ( p.position.x + p.radius > _canvas.width && p.velocity.x > 0) {// rudimentario detector de colisión con la pared derecha
+							p.velocity.x *= p.cr;
+							p.position.x = _canvas.width - p.radius;
+						}
+
 					}
 
 				}
